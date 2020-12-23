@@ -196,7 +196,7 @@ SELECT
     e.employer_name,
     count(r.vacancy_id) AS vac_count
 FROM response r
-JOIN vacancy v ON r.vacancy_id = v.vacancy_id
+FULL JOIN vacancy v ON r.vacancy_id = v.vacancy_id
 JOIN employer e ON v.employer_id = e.employer_id
 GROUP BY
     e.employer_id
@@ -221,12 +221,22 @@ GROUP BY v2.id
 ORDER BY median desc, v2.id; 
     
 -- 7. Вывести минимальное и максимальное время от создания вакансии до первого отклика для каждого города.
+WITH days_of_first_response AS (
+	SELECT
+		v.vacancy_id, 
+		v.employer_id,
+		MIN(r.response_date - v.creation_date) AS first_response_days
+	FROM response r
+	JOIN vacancy v ON r.vacancy_id = v.vacancy_id
+	GROUP BY v.vacancy_id
+	ORDER BY v.vacancy_id
+)
 SELECT
     e.area_id,
-    MAX(r.response_date - v.creation_date) AS days_max,
-    MIN(r.response_date - v.creation_date) AS days_min
+    MAX(dfr.first_response_days) AS days_max,
+    MIN(dfr.first_response_days) AS days_min
 FROM response r
-JOIN vacancy v ON r.vacancy_id = v.vacancy_id
-JOIN employer e ON v.employer_id = e.employer_id
+JOIN days_of_first_response dfr ON r.vacancy_id = dfr.vacancy_id
+JOIN employer e ON dfr.employer_id = e.employer_id
 GROUP BY e.area_id
 ORDER BY e.area_id;
