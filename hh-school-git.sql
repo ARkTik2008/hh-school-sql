@@ -196,7 +196,7 @@ SELECT
     e.employer_name,
     count(r.vacancy_id) AS vac_count
 FROM response r
-FULL JOIN vacancy v ON r.vacancy_id = v.vacancy_id
+RIGHT JOIN vacancy v ON r.vacancy_id = v.vacancy_id
 JOIN employer e ON v.employer_id = e.employer_id
 GROUP BY
     e.employer_id
